@@ -1,36 +1,44 @@
-pool:
-  vmImage: 'ubuntu-16.04'
-trigger:
-  - master
-steps:
-  - task: Npm@1
-    inputs:
+--- 
+pool: 
+  vmImage: ubuntu-16.04
+steps: 
+  - 
+    inputs: 
       command: install
-  - script: 'npm test'
-    displayName: 'Run unit tests'
+    task: Npm@1
+  - 
     continueOnError: true
-  - task: PublishTestResults@2
-    displayName: 'Publish Test Results'
+    displayName: "Run unit tests"
+    script: "npm test"
+  - 
     condition: succeededOrFailed()
-    inputs:
+    displayName: "Publish Test Results"
+    inputs: 
       testResultsFiles: $(System.DefaultWorkingDirectory)/test-report.xml
-  - task: PublishCodeCoverageResults@1
-    displayName: 'Publish Code Coverage'
-    condition: 'in(variables[''Agent.JobStatus''], ''Succeeded'')'
-    inputs:
+    task: PublishTestResults@2
+  - 
+    condition: "in(variables['Agent.JobStatus'], 'Succeeded')"
+    displayName: "Publish Code Coverage"
+    inputs: 
       codeCoverageTool: Cobertura
-      summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/*coverage.xml'
       reportDirectory: $(System.DefaultWorkingDirectory)/coverage
-  - task: ArchiveFiles@2
-    displayName: 'Archive sources'
-    inputs:
-      rootFolderOrFile: $(Build.SourcesDirectory)
+      summaryFileLocation: $(System.DefaultWorkingDirectory)/coverage/*coverage.xml
+    task: PublishCodeCoverageResults@1
+  - 
+    displayName: "Archive sources"
+    inputs: 
       includeRootFolder: false
-  - task: CopyFiles@2
-    displayName: 'Copy ARM templates'
-    inputs:
+      rootFolderOrFile: $(Build.SourcesDirectory)
+    task: ArchiveFiles@2
+  - 
+    displayName: "Copy ARM templates"
+    inputs: 
+      Contents: "*.json"
       SourceFolder: deployment
-      Contents: '*.json'
-      TargetFolder: '$(build.artifactstagingdirectory)/Templates'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: drop'
+      TargetFolder: $(build.artifactstagingdirectory)/Templates
+    task: CopyFiles@2
+  - 
+    displayName: "Publish Artifact: drop"
+    task: PublishBuildArtifacts@1
+trigger: 
+  - master
